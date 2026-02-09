@@ -1,42 +1,9 @@
-# ============================================================
-# Steel Browser - docker-compose with API Key Authentication
-# ============================================================
-# The self-hosted Steel Browser has NO built-in auth.
-# We add an Nginx reverse proxy to enforce Steel-Api-Key header
-# authentication on all API and CDP WebSocket requests.
-#
-# Usage:
-#   1. Copy .env.example to .env and set your desired API key
-#   2. docker compose up -d
-#   3. Test: curl -H "Steel-Api-Key: your-secret-key" http://localhost:3000/v1/sessions
-# ============================================================
-
 services:
-
-  # ── Nginx Auth Proxy (public-facing) ──
-  nginx:
-    image: nginx:alpine
-    ports:
-      - "3000:3000"       # API (authenticated)
-      - "9223:9223"       # CDP WebSocket (authenticated)
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/auth.conf.template:/etc/nginx/auth.conf.template:ro
-      - ./nginx/entrypoint.sh:/docker-entrypoint-custom.sh:ro
-    entrypoint: ["/bin/sh", "/docker-entrypoint-custom.sh"]
-    environment:
-      - STEEL_API_KEY=${STEEL_API_KEY:-change-me-to-a-strong-secret-key}
-    depends_on:
-      - api
-    restart: unless-stopped
-
-  # ── Steel Browser API (internal only, no public ports) ──
   api:
     image: ghcr.io/steel-dev/steel-browser-api:latest
-    # NOTE: ports are NOT exposed publicly — only accessible via nginx
-    expose:
-      - "3000"
-      - "9223"
+    ports:
+      - "3000:3000"
+      - "9223:9223"
     volumes:
       - logs:/data/logs
       - exports:/tmp/steel-browser-exports
@@ -46,19 +13,15 @@ services:
       - CDP_DOMAIN=${CDP_DOMAIN:-localhost:9223}
       - LOG_STORAGE_ENABLED=true
       - LOG_STORAGE_PATH=/data/logs/browser-logs.duckdb
-    restart: unless-stopped
 
-  # ── Steel Browser UI ──
   ui:
     image: ghcr.io/steel-dev/steel-browser-ui:latest
     ports:
       - "5173:80"
     environment:
-      - API_URL=http://api:3000
+      - API_URL=${API_URL:-http://api:3000}
     depends_on:
       - api
-    restart: unless-stopped
-
 
 volumes:
   logs:
