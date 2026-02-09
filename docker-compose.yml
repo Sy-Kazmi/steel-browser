@@ -24,13 +24,6 @@ services:
       - API_URL=${API_URL:-http://api:3000}
     depends_on:
       - api
-    networks:
-      - steel-network
-
-networks:
-  steel-network:
-    name: steel-network
-    driver: bridge
 
 volumes:
   logs:
