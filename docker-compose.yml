@@ -1,9 +1,26 @@
 services:
-  api:
-    image: ghcr.io/steel-dev/steel-browser-api:latest
+  # ── Nginx Gateway (API key authentication) ──
+  gateway:
+    image: nginx:alpine
     ports:
       - "3000:3000"
       - "9223:9223"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/auth.conf.template:/etc/nginx/auth.conf.template:ro
+      - ./nginx/entrypoint.sh:/entrypoint.sh:ro
+    environment:
+      - STEEL_API_KEY=${STEEL_API_KEY}
+    entrypoint: ["/bin/sh", "/entrypoint.sh"]
+    depends_on:
+      - api
+
+  # ── API (internal only — not exposed to host) ──
+  api:
+    image: ghcr.io/steel-dev/steel-browser-api:latest
+    expose:
+      - "3000"
+      - "9223"
     volumes:
       - logs:/data/logs
       - exports:/tmp/steel-browser-exports
@@ -14,6 +31,7 @@ services:
       - LOG_STORAGE_ENABLED=true
       - LOG_STORAGE_PATH=/data/logs/browser-logs.duckdb
 
+  # ── UI ──
   ui:
     image: ghcr.io/steel-dev/steel-browser-ui:latest
     ports:
