@@ -13,6 +13,8 @@ services:
       - CDP_DOMAIN=${CDP_DOMAIN:-localhost:9223}
       - LOG_STORAGE_ENABLED=true
       - LOG_STORAGE_PATH=/data/logs/browser-logs.duckdb
+   labels:
+        - traefik.docker.network=noc8ww04oo000ogcw8occ808
     networks:
       - steel-network
 
@@ -22,6 +24,8 @@ services:
       - "5173:80"
     environment:
       - API_URL=${API_URL:-http://api:3000}
+    labels:
+        - traefik.docker.network=noc8ww04oo000ogcw8occ808
     depends_on:
       - api
     networks:
