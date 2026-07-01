@@ -12,7 +12,7 @@ services:
     environment:
       - DOMAIN=${DOMAIN:-localhost:3000}
       - CDP_DOMAIN=${CDP_DOMAIN:-localhost:9223}
-      - LOG_STORAGE_ENABLED=true
+      - LOG_STORAGE_ENABLED=false
       - LOG_STORAGE_PATH=/data/logs/browser-logs.duckdb
 
   ui:
