@@ -1,7 +1,9 @@
 services:
   api:
     image: ghcr.io/steel-dev/steel-browser-api:latest
-    shm_size: "2GB"
+    shm_size: 2GB
+    mem_limit: 8g
+    memswap_limit: 8g
     ports:
       - "3000:3000"
       - "9223:9223"
